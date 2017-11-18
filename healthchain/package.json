@@ -1,0 +1,23 @@
+{
+  "name": "healthchain",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "async": "^2.6.0",
+    "concat-stream": "^1.6.0",
+    "ipfs": "^0.26.0",
+    "ipfs-api": "^17.0.0",
+    "react": "^16.1.1",
+    "react-bootstrap": "^0.31.5",
+    "react-dom": "^16.1.1",
+    "react-scripts": "1.0.17",
+    "safe-buffer": "^5.1.1",
+    "uport-connect": "^0.7.0"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  }
+}
