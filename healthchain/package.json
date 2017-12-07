@@ -4,6 +4,8 @@
   "private": true,
   "dependencies": {
     "async": "^2.6.0",
+    "async-series": "0.0.1",
+    "cb": "^0.1.0",
     "concat-stream": "^1.6.0",
     "ipfs": "^0.26.0",
     "ipfs-api": "^17.0.0",
