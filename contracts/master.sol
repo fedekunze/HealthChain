@@ -18,6 +18,15 @@ contract Master {
     return indexToFunc[indexFinger].call(bytes4(sha3("accessData(address)")), msg.sender);
   }
 
+  function addPatient(string indexFinger, bytes32 _func, address pcp, bytes32 _ipfshashHash, bytes32 _jsonHash) {
+    newAddress = address(new Patient(_func, _pcp, _ipfshasthHash, _jsonHash));
+    indexToFunc[indexFinger] = newAddress;
+  }
+
+  function updatePatient(string indexFinger, bytes32 _func, address pcp, bytes32 _ipfshashHash, bytes32 _jsonHash) {
+    indexToFunc[indexFinger].call(bytes4(sha3("updateData(bytes32, address, bytes32, bytes32)")), _func, pcp, _ipfshashHash, _jsonHash);
+  }
+
 
   /*function accessData(uint32 indexFinger, uint32 thumb) public {
     bytes32 memory indexHash = sha256(indexFinger);
