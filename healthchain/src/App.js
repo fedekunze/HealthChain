@@ -4,6 +4,7 @@ import {Grid, Row, Col, Modal, Alert, Form, FormGroup, Button, FormControl, Help
 import Upload from './Upload';
 import Retrieve from './Retrieve';
 import Navb from './Navb';
+import { masterContract, address, web3 } from './EthereumSetup';
 import './App.css';
 
 var shajs = require('sha.js');
@@ -52,7 +53,6 @@ class App extends Component {
     for (var i = 0; i < ipfsHash.length; i += 1) {
       transformed[i] = String.fromCharCode(thumbHash.charCodeAt(i) + ipfsHash.charCodeAt(i));
     }
-    // Store transformed in the mapping: mapping[indexHash] = transformed;
     return transformed;
   }
 
@@ -60,7 +60,16 @@ class App extends Component {
     // hash2Ipfs: hash of the ipfsHash value
     // ipfsHash: link to data
   _uploadEmergencyInfo(transformedArray, dataJson, hash2Ipfs, ipfsHash, indexPrint) {
+    // Store transformed in the mapping: mapping[indexHash] = transformed;
+
     // web3
+    masterContract.addPatient(indexPrint.toString(), transformedArray, address[0], hash2Ipfs, dataJson, {from: accounts[0], gas: 4000000}, function(error, result) {
+      if (error) {
+        console.log('Error: ' + error);
+      } else {
+        console.log('Result: ' + result);
+      }
+    })
   }
 
 
@@ -68,13 +77,21 @@ class App extends Component {
   // get emergency info using both fingerprints
   _retrieveEmergencyInfo(thumbPrint, indexPrint) {
     // get transformed from mapping using index fingerprint
-    //let transformed = mapping[indexPrint.toString()]; // web3
+    // web3
+    let transformed = masterContract.pullFunc(indexPrint.toString(), {from: accounts[0], gas: 4000000}, function(error, result) {
+      if (error) {
+        console.log('Error: ' + error);
+      } else {
+        transformed = result;
+        console.log('Result: ' + result);
+      }
+    });
 
     // Using transformed get the IPFS hash to get data
     let thumbHash = shajs('sha256').update(thumbPrint.toString()).digest('hex');
     var ipfsHash = "";
     for (var i = 0; i < thumbHash.length; i += 1) {
-      
+
       //ipfsHash += String.fromCharCode(transformed.charCodeAt(i) - thumbHash.charCodeAt(i));
     }
     return ipfsHash;
