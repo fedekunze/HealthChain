@@ -3,15 +3,19 @@ import "Patient.sol";
 
 contract Master {
 
-  mapping(bytes32 => address) indexToFunc;
+  mapping(string => address) indexToFunc;
 
   function hashFinger(uint finger) public returns(bytes32) {
     return sha256(finger);
   }
 
-  function toBytes(uint256 x) public returns (bytes b) {
+  /*function toBytes(uint256 x) public returns (bytes b) {
     b = new bytes(32);
     assembly { mstore(add(b, 32), x) }
+  }*/
+
+  function pullFunc(string indexFinger) returns(address) {
+    return indexToFunc[indexFinger].;
   }
 
 

@@ -3,38 +3,50 @@ pragma solidity ^0.4.15;
 contract Patient {
   address owner;
   uint num_updates;
-  bytes32 functionInputs;
+  public bytes32 func; // the output after something is uploaded
 
 
-  struct AccessEmergencyData {
+  struct AccessData {
     address requester;
-    address owner;
     uint timestamp;
   }
 
-  mapping (address => AccessEmergencyData[]) emergencyAccesses;
-
-  //
-  mapping(uint => address) updatesByTime;
-
-  //
-  mapping(address => uint) mostRecentUpdate;
-
-  event InfoChanged(address);
-  event Emergency(address);
-
-  function Patient(bytes32 _functionInputs, address pcp) public {
-    functionInputs = _functionInputs;
-    uint time = now;
-    updatesByTime[time] = pcp;
-    mostRecentUpdate[pcp] = now;
-    InfoChanged(pcp);
+  struct UpdateData {
+    address updater;
+    uint timestamp;
+    bytes32 jsonHash;
+    bytes32 ipfshashHash;
   }
 
-  function toBytes(uint256 x) public returns (bytes b) {
+
+
+  mapping (address => AccessData[]) dataAccesses;
+  mapping (address => UpdateData[]) dataUpdates;
+
+
+  event DataUpdated(address);
+  event DataAccessed(address);
+
+  modifier ownlerOnly()
+    {
+        require(msg.sender == owner);
+        _;
+    }
+
+
+//constructor
+  function Patient(bytes32 _func, address pcp) public {
+    func = _func;
+    uint time = now;
+    dataUpdates[pcp].push(UpdateData(pcp, time));
+    DataUpdated(pcp);
+  }
+
+
+  /*function toBytes(uint256 x) public returns (bytes b) {
     b = new bytes(32);
     assembly { mstore(add(b, 32), x) }
-  }
+  }*/
 
 
   /*function returnHash(bytes32 thumbHash) public returns (bytes) {
@@ -53,8 +65,15 @@ contract Patient {
     return output;
   } */
 
+  function accessData(address requester) returns (bytes32) {
+    uint time = now;
+    DataAccessed(requester);
+    dataAccesses[requester].push(AccessData(emt, time))
+  }
 
-  function updateInfo(bytes input, address pcp) public {
-    InfoChanged(pcp);
+  function updateData(address pcp) ownlerOnly() public {
+    uint time = now;
+    DataUpdated(pcp);
+    dataUpdates[pcp].push(UpdateData(pcp, time));
   }
 }
