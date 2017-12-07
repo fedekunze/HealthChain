@@ -5,9 +5,9 @@ contract Master {
 
   mapping(string => address) indexToFunc;
 
-  function hashFinger(uint finger) public returns(bytes32) {
+  /*function hashFinger(uint finger) public returns(bytes32) {
     return sha256(finger);
-  }
+  }*/
 
   /*function toBytes(uint256 x) public returns (bytes b) {
     b = new bytes(32);
@@ -15,7 +15,7 @@ contract Master {
   }*/
 
   function pullFunc(string indexFinger) returns(address) {
-    return indexToFunc[indexFinger].;
+    return indexToFunc[indexFinger].call(bytes4(sha3("accessData(address)")), msg.sender);
   }
 
 

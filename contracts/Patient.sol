@@ -4,6 +4,8 @@ contract Patient {
   address owner;
   uint num_updates;
   public bytes32 func; // the output after something is uploaded
+  public ipfshashHash;
+  public jsonHash;
 
 
   struct AccessData {
@@ -35,8 +37,10 @@ contract Patient {
 
 
 //constructor
-  function Patient(bytes32 _func, address pcp) public {
+  function Patient(bytes32 _func, address pcp, bytes32 _ipfshashHash, bytes32 _jsonHash) public {
     func = _func;
+    ipfshashHash = _ipfshashHash;
+    jsonHash = _jsonHash;
     uint time = now;
     dataUpdates[pcp].push(UpdateData(pcp, time));
     DataUpdated(pcp);
@@ -69,11 +73,13 @@ contract Patient {
     uint time = now;
     DataAccessed(requester);
     dataAccesses[requester].push(AccessData(emt, time))
+    return func;
   }
 
-  function updateData(address pcp) ownlerOnly() public {
+  function updateData(bytes32 _func, address pcp, bytes32 _ipfshashHash, bytes32 _jsonHash) ownlerOnly() public {
     uint time = now;
     DataUpdated(pcp);
     dataUpdates[pcp].push(UpdateData(pcp, time));
+    func  =
   }
 }
