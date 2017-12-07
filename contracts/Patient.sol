@@ -72,7 +72,7 @@ contract Patient {
   function accessData(address requester) returns (bytes32) {
     uint time = now;
     DataAccessed(requester);
-    dataAccesses[requester].push(AccessData(emt, time))
+    dataAccesses[requester].push(AccessData(requester, time))
     return func;
   }
 

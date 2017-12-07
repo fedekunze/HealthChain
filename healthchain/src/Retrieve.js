@@ -1,13 +1,14 @@
 import React, { Component } from 'react';
 import {Form, FormGroup, Button, FormControl, HelpBlock,
   ControlLabel} from 'react-bootstrap';
+  const concat = require('concat-stream');
 
 class Retrieve extends Component {
 
   constructor(props) {
     super(props);
     this.state = {
-      hash: ''
+      hash: '',
       data: undefined
     }
     this.submitRequest = this.submitRequest.bind(this);
@@ -16,7 +17,7 @@ class Retrieve extends Component {
 
   //QmVYVDmda2cTYsFaQsu2Hfy4LkJWr7sywR3ymbxevVu41s
     display(hash) {
-      node.files.cat(hash, (err, res) => {
+      this.props.node.files.cat(hash, (err, res) => {
         if (err || !res) {
           return console.error('ipfs cat error', err, res);
         }

@@ -7,8 +7,6 @@ import Navb from './Navb';
 import './App.css';
 
 var shajs = require('sha.js');
-const concat = require('concat-stream')
-const Buffer = require('safe-buffer').Buffer
 
 
   var IPFS = require('ipfs')
@@ -50,8 +48,8 @@ class App extends Component {
   // Array transformed created on upload
   _makeFunction(thumbPrint, ipfsHash) {
     let thumbHash = shajs('sha256').update(thumbPrint.toString()).digest('hex');
-    var transformed = new Array(len(thumbHash)); // array of ASCII chars
-    for (i = 0; i < len(ipfsHash); i += 1) {
+    var transformed = new Array(thumbHash.length); // array of ASCII chars
+    for (var i = 0; i < ipfsHash.length; i += 1) {
       transformed[i] = String.fromCharCode(thumbHash.charCodeAt(i) + ipfsHash.charCodeAt(i));
     }
     // Store transformed in the mapping: mapping[indexHash] = transformed;
@@ -70,13 +68,14 @@ class App extends Component {
   // get emergency info using both fingerprints
   _retrieveEmergencyInfo(thumbPrint, indexPrint) {
     // get transformed from mapping using index fingerprint
-    // let transformed = mapping[indexPrint.toString()]; // web3
+    //let transformed = mapping[indexPrint.toString()]; // web3
 
     // Using transformed get the IPFS hash to get data
     let thumbHash = shajs('sha256').update(thumbPrint.toString()).digest('hex');
     var ipfsHash = "";
-    for (i = 0; i < len(thumbHash); i += 1) {
-      ipfsHash += String.fromCharCode(transformed.charCodeAt(i) - thumbHash.charCodeAt(i));
+    for (var i = 0; i < thumbHash.length; i += 1) {
+      
+      //ipfsHash += String.fromCharCode(transformed.charCodeAt(i) - thumbHash.charCodeAt(i));
     }
     return ipfsHash;
   }
@@ -115,6 +114,7 @@ class App extends Component {
               <Row>
                 <Col md={6} mdOffset={3} sm={8} smOffset={2}>
                   <Upload
+                    node={node}
                     verifyFingerprint={this._verifyFingerprint}
                     makeFunction={this._makeFunction}
                     uploadEmergencyInfo={this._uploadEmergencyInfo}
@@ -142,6 +142,7 @@ class App extends Component {
               <Row>
                 <Col md={6} mdOffset={3} sm={8} smOffset={2}>
                   <Retrieve
+                    node={node}
                     verifyFingerprint={this._verifyFingerprint}
                     retrieveEmergencyInfo={this._retrieveEmergencyInfo}
                   />

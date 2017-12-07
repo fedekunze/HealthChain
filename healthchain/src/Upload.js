@@ -2,21 +2,29 @@ import React, { Component } from 'react';
 import {Form, FormGroup, Button, FormControl, HelpBlock, Radio,
   ControlLabel} from 'react-bootstrap';
 var shajs = require('sha.js');
+const Buffer = require('safe-buffer').Buffer
 
 class Upload extends Component {
 
   constructor(props) {
     super(props);
     this.state = {
-      selectedOption: ''
+      radioValue: 'Yes'
     }
-    this.handleOptionChange = this.handleOptionChange.bind(this);
+    this.changeRadioValueYes = this.changeRadioValueYes.bind(this);
+    this.changeRadioValueNo = this.changeRadioValueNo.bind(this);
     this.submitData = this.submitData.bind(this);
   }
 
-  handleOptionChange(event) {
+  changeRadioValueYes() {
     this.setState({
-      selectedOption: event.target.value
+      radioValue: "Yes"
+    });
+  }
+
+  changeRadioValueNo() {
+    this.setState({
+      radioValue: "No"
     });
   }
 
@@ -36,6 +44,7 @@ class Upload extends Component {
     } else {
 
       // set variables of the scope
+      let surgicalHistory_array = this._surgicalHistory.value.trim().split('\n');
       let medicalHistory_array = this._medicalHistory.value.trim().split('\n');
       let allergies_array = this._allergies.value.trim().split('\n');
       let medications_array = this._medications.value.trim().split('\n');
@@ -44,12 +53,16 @@ class Upload extends Component {
       let alcohol_array = ((!this._alcohol) ? [] : this._alcohol.value.trim());
       let thumb = this._thumbUpload.value;
       let index = this._indexUpload.value;
+      let dnr = ((this.state.radioValue === "Yes") ? false : true)
       console.log(this._dob.value);
 
       // store the states in a dictionary
       let json_data = {
         'name': this._name.value,
         'dob': this._dob.value,
+        'DNR': dnr,
+        'hospital': this._hospital.value,
+        'surgeries': surgicalHistory_array,
         'medical': medicalHistory_array,
         'allergies': allergies_array,
         'medications': medications_array,
@@ -68,7 +81,7 @@ class Upload extends Component {
 
       let ipfsHash = '';
 
-      node.files.add({
+      this.props.node.files.add({
         path: 'data.json',
         content: Buffer.from(strObj)}, (err, res) => {
         if (err || !res) {
@@ -96,10 +109,13 @@ class Upload extends Component {
 
       // clear values of inputs
       console.log('Clearing inputs...');
+      this.setState({radioValue: ''});
       this._name.value = '';
       this._dob.value = '';
+      this._hospital.value = '';
       this._medications.value = '';
       this._allergies.value = '';
+      this._surgicalHistory.value = '';
       this._medicalHistory.value = '';
       this._alcohol.value = '';
       this._drugs.value = '';
@@ -146,11 +162,20 @@ class Upload extends Component {
 
         <FormGroup>
           <ControlLabel>Resuscitate  </ControlLabel>
-          <Radio name="resuscitateGroup">
+          <Radio
+            name="resuscitateGroup"
+            onChange={this.changeRadioValueYes}
+            checked={"Yes" === this.state.radioValue}
+            >
             Yes
           </Radio>
           {' '}
-          <Radio name="resuscitateGroup" inline>
+          <Radio
+            name="resuscitateGroup"
+            onChange={this.changeRadioValueNo}
+            checked={"No" === this.state.radioValue}
+            inline
+          >
             No
           </Radio>
         </FormGroup>
