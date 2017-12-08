@@ -4,7 +4,7 @@ import {Grid, Row, Col, Modal, Alert, Form, FormGroup, Button, FormControl, Help
 import Upload from './Upload';
 import Retrieve from './Retrieve';
 import Navb from './Navb';
-import { masterContract, address, web3 } from './EthereumSetup';
+import { patientContract, accounts, web3 } from './EthereumSetup';
 import './App.css';
 
 var shajs = require('sha.js');
@@ -15,7 +15,7 @@ var shajs = require('sha.js');
   const node = new IPFS({
     repo: 'ipfs-repo-'+String(Math.random()),
     config: {
-      Addresses: {
+      accountses: {
         Swarm: [
           "/dns4/star-signal.cloud.ipfs.team/wss/p2p-webrtc-star"
         ],
@@ -61,31 +61,32 @@ class App extends Component {
     // ipfsHash: link to data
   _uploadEmergencyInfo(transformedArray, dataJson, hash2Ipfs, ipfsHash, indexPrint) {
     // Store transformed in the mapping: mapping[indexHash] = transformed;
-    // let exists = masterContract.userExists(indexPrint.toString(), {from: address[0], gas: 4000000}, function(error, result) {
-    //   if (error) {
-    //     console.log('Error: ' + error);
-    //   } else {
-    //     console.log('Result: ' + result);
-    //   }
-    // });
-    // // web3
-    // if (!exists) {
-    //   masterContract.addPatient(indexPrint.toString(), transformedArray, address[0], hash2Ipfs, dataJson, {from: address[0], gas: 4000000}, function(error, result) {
-    //     if (error) {
-    //       console.log('Error: ' + error);
-    //     } else {
-    //       console.log('Result: ' + result);
-    //     }
-    //   });
-    // } else {
-    //   masterContract.updatePatient(indexPrint.toString(), transformedArray, address[0], hash2Ipfs, dataJson, {from: address[0], gas: 4000000}, function(error, result) {
-    //     if (error) {
-    //       console.log('Error: ' + error);
-    //     } else {
-    //       console.log('Result: ' + result);
-    //     }
-    //   });
-    // }
+    let indexHash = shajs('sha256').update(indexPrint.toString()).digest('hex');
+    let exists = patientContract.userExists(indexHash, {from: accounts[0], gas: 4000000}, function(error, result) {
+      if (error) {
+        console.log('Error: ' + error);
+      } else {
+        console.log('Result: ' + result);
+      }
+    });
+    // web3
+    if (!exists) {
+      patientContract.createPatient(accounts[0], indexHash, transformedArray, {from: accounts[0], gas: 4000000}, function(error, result) {
+        if (error) {
+          console.log('Error: ' + error);
+        } else {
+          console.log('Result: ' + result);
+        }
+      });
+    }
+      patientContract.updateData(accounts[0], hash2Ipfs, dataJson, {from: accounts[0], gas: 4000000}, function(error, result) {
+        if (error) {
+          console.log('Error: ' + error);
+        } else {
+          console.log('Result: ' + result);
+        }
+      });
+
   }
 
 
@@ -93,22 +94,23 @@ class App extends Component {
   _retrieveEmergencyInfo(thumbPrint, indexPrint) {
     // get transformed from mapping using index fingerprint
     // web3
-    // let transformed = masterContract.pullFunc(indexPrint.toString(), {from: address[0], gas: 4000000}, function(error, result) {
-    //   if (error) {
-    //     console.log('Error: ' + error);
-    //   } else {
-    //     transformed = result;
-    //     console.log('Result: ' + result);
-    //   }
-    // });
-    //
-    // // Using transformed get the IPFS hash to get data
-    // let thumbHash = shajs('sha256').update(thumbPrint.toString()).digest('hex');
-    // var ipfsHash = "";
-    // for (var i = 0; i < thumbHash.length; i += 1) {
-    //   ipfsHash += String.fromCharCode(transformed.charCodeAt(i) - thumbHash.charCodeAt(i));
-    // }
-    // return ipfsHash;
+    let indexHash = shajs('sha256').update(indexPrint.toString()).digest('hex');
+    let transformed = patientContract.accessData(accounts[0], indexHash, {from: accounts[0], gas: 4000000}, function(error, result) {
+      if (error) {
+        console.log('Error: ' + error);
+      } else {
+        transformed = result;
+        console.log('Result: ' + result);
+      }
+    });
+
+    // Using transformed get the IPFS hash to get data
+    let thumbHash = shajs('sha256').update(thumbPrint.toString()).digest('hex');
+    var ipfsHash = "";
+    for (var i = 0; i < thumbHash.length; i += 1) {
+      ipfsHash += String.fromCharCode(transformed.charCodeAt(i) - thumbHash.charCodeAt(i));
+    }
+    return ipfsHash;
   }
 
 
