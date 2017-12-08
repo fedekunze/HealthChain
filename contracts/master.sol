@@ -1,38 +1,54 @@
 pragma solidity ^0.4.15;
-import "Patient.sol";
+import "./Patient.sol";
 
 contract Master {
 
-  mapping(string => address) indexToFunc;
+  Patient patientContract;
 
-  /*function hashFinger(uint finger) public returns(bytes32) {
-    return sha256(finger);
-  }*/
+  mapping(string => address) indexToAddress; // maps index with address
+  mapping (bytes32 => string) indexToFunc; // maps index's hash to the temp string
 
-  /*function toBytes(uint256 x) public returns (bytes b) {
-    b = new bytes(32);
-    assembly { mstore(add(b, 32), x) }
-  }*/
+
+  // constructor function
+  function Master(string _temporalArray, string _ipfs2Hash, string _jsonHash) public {
+    bytes32 ipfs = stringToBytes32(_ipfs2Hash);
+    bytes32 json = stringToBytes32(_jsonHash);
+    bytes32 temp = stringToBytes32(_temporalArray);
+
+    patientContract = Patient(msg.sender);
+
+
+  }
+
+
+  function userExists(string indexPrint) constant public returns (bool) {
+    if (indexToAddress[indexPrint] == address(0)) return true;
+    else return false;
+  }
+
+  function stringToBytes32(string memory source) returns (bytes32 result) {
+    bytes memory tempEmptyStringTest = bytes(source);
+    if (tempEmptyStringTest.length == 0) {
+        return 0x0;
+    }
+
+    assembly {
+        result := mload(add(source, 32))
+    }
+  }
 
   function pullFunc(string indexFinger) returns(address) {
-    return indexToFunc[indexFinger].call(bytes4(sha3("accessData(address)")), msg.sender);
+    return (indexToAddress[indexFinger]).call(bytes4(sha3("accessData(address)")), msg.sender);
   }
 
-  function addPatient(string indexFinger, bytes32 _func, address pcp, bytes32 _ipfshashHash, bytes32 _jsonHash) {
-    newAddress = address(new Patient(_func, _pcp, _ipfshasthHash, _jsonHash));
-    indexToFunc[indexFinger] = newAddress;
+  function addPatient(string indexFinger, string _temporalArray, address _pcp, string _ipfshashHash, string _jsonHash) {
+    address newAddress = address(Patient(_temporalArray, _pcp, _ipfshashHash, _jsonHash));
+    indexToAddress[indexFinger] = newAddress;
   }
 
-  function updatePatient(string indexFinger, bytes32 _func, address pcp, bytes32 _ipfshashHash, bytes32 _jsonHash) {
-    indexToFunc[indexFinger].call(bytes4(sha3("updateData(bytes32, address, bytes32, bytes32)")), _func, pcp, _ipfshashHash, _jsonHash);
+  function updatePatient(string indexFinger, string _func, address _pcp, string _ipfshashHash, string _jsonHash) {
+    indexToAddress[indexFinger].call(bytes4(sha3("updateData(string, address, string, string)")), _func, _pcp, _ipfshashHash, _jsonHash);
   }
-
-
-  /*function accessData(uint32 indexFinger, uint32 thumb) public {
-    bytes32 memory indexHash = sha256(indexFinger);
-    bytes32 memory thumbHash = sha256(thumb);
-    return indexToFunc[indexHash].call(bytes4(sha3("returnHash(bytes32)")),thumbHash);
-  }*/
 
 
 

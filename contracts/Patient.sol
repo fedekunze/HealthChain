@@ -1,12 +1,9 @@
 pragma solidity ^0.4.15;
 
 contract Patient {
+
   address owner;
   uint num_updates;
-  public bytes32 func; // the output after something is uploaded
-  public ipfshashHash;
-  public jsonHash;
-
 
   struct AccessData {
     address requester;
@@ -15,71 +12,72 @@ contract Patient {
 
   struct UpdateData {
     address updater;
+    uint numberOfUpdates;
     uint timestamp;
     bytes32 jsonHash;
-    bytes32 ipfshashHash;
+    bytes32 ipfs2Hash;
   }
 
+  struct User {
+    address addr;
+    bytes32 transformed; // hash that allows to store and retrieve data
+  }
 
+  mapping (bytes32 => address) private patients; // index fingerprint to user
+  mapping (address => string) private patientToFunc;
+  mapping (address => AccessData[]) public dataAccesses;
+  mapping (address => UpdateData[]) public dataUpdates;
 
-  mapping (address => AccessData[]) dataAccesses;
-  mapping (address => UpdateData[]) dataUpdates;
+  event patientCreated();
+  event DataUpdated(address patient);
+  event DataAccessed(address requester, address patient);
+  event ContractInitialized();
 
-
-  event DataUpdated(address);
-  event DataAccessed(address);
-
-  modifier ownlerOnly()
-    {
-        require(msg.sender == owner);
-        _;
-    }
+  modifier ownlerOnly() {
+    require(msg.sender == owner);
+    _;
+  }
 
 
 //constructor
-  function Patient(bytes32 _func, address pcp, bytes32 _ipfshashHash, bytes32 _jsonHash) public {
-    func = _func;
-    ipfshashHash = _ipfshashHash;
-    jsonHash = _jsonHash;
-    uint time = now;
-    dataUpdates[pcp].push(UpdateData(pcp, time));
-    DataUpdated(pcp);
+  function Patient(address _pcp, bytes32 _ipfshashHash, bytes32 _jsonHash) public {
+    owner = _pcp; // patient owner of the contract ?
+    updateData(msg.sender, _ipfshashHash, _jsonHash);
+    ContractInitialized();
   }
 
+  function userExists(bytes32 indexPrint) constant public returns (bool) {
+    if (patients[indexPrint] == address(0)) return false;
+    else return true;
+  }
 
-  /*function toBytes(uint256 x) public returns (bytes b) {
-    b = new bytes(32);
-    assembly { mstore(add(b, 32), x) }
-  }*/
+  function createPatient(address _addr, bytes32 _indexFingerprint, string _func) public {
+    patients[_indexFingerprint] = _addr;
+    patientToFunc[_addr] = _func;
+    patientCreated();
+  }
 
-
-  /*function returnHash(bytes32 thumbHash) public returns (bytes) {
-    /*bytes memory output;
-    for (uint i = 0; i < 64; i += 1) {
-      uint a = uint(thumbHash[i]);
-      uint b = uint(functionInputs[i]);
-      if (a > b) {
-        (output[i]) = (toBytes(a  - b));
-      } else {
-        output[i] = bytes1(toBytes(b - a));
-      }
-      a = 0;
-      b = 0;
-    }
-    return output;
-  } */
-
-  function accessData(address requester) returns (bytes32) {
+  function accessData(address _requester, bytes32 _indexFingerprint) constant public returns (string) {
     uint time = now;
-    DataAccessed(requester);
-    dataAccesses[requester].push(AccessData(requester, time))
+    address patientAddr = patients[_indexFingerprint];
+    dataAccesses[patientAddr].push(AccessData({
+      requester: _requester,
+      timestamp: time
+      }));
+    DataAccessed(_requester, patientAddr);
+    string func = patientToFunc[patientAddr];
     return func;
   }
 
-  function updateData(bytes32 _func, address pcp, bytes32 _ipfshashHash, bytes32 _jsonHash) ownlerOnly() public {
+  function updateData(address _pcp, bytes32 _ipfshashHash, bytes32 _jsonHash) ownlerOnly() {
     uint time = now;
-    DataUpdated(pcp);
-    dataUpdates[pcp].push(UpdateData(pcp, time));
-    func  =
+    uint updates = dataUpdates[_pcp][dataUpdates[_pcp].length -1].numberOfUpdates;
+    dataUpdates[_pcp].push(UpdateData({
+      updater: _pcp,
+      numberOfUpdates: updates + 1,
+      timestamp: time,
+      jsonHash: _jsonHash,
+      ipfs2Hash: _ipfshashHash}));
+    DataUpdated(_pcp);
   }
 }

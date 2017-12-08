@@ -61,40 +61,54 @@ class App extends Component {
     // ipfsHash: link to data
   _uploadEmergencyInfo(transformedArray, dataJson, hash2Ipfs, ipfsHash, indexPrint) {
     // Store transformed in the mapping: mapping[indexHash] = transformed;
-
-    // web3
-    masterContract.addPatient(indexPrint.toString(), transformedArray, address[0], hash2Ipfs, dataJson, {from: accounts[0], gas: 4000000}, function(error, result) {
-      if (error) {
-        console.log('Error: ' + error);
-      } else {
-        console.log('Result: ' + result);
-      }
-    })
+    // let exists = masterContract.userExists(indexPrint.toString(), {from: address[0], gas: 4000000}, function(error, result) {
+    //   if (error) {
+    //     console.log('Error: ' + error);
+    //   } else {
+    //     console.log('Result: ' + result);
+    //   }
+    // });
+    // // web3
+    // if (!exists) {
+    //   masterContract.addPatient(indexPrint.toString(), transformedArray, address[0], hash2Ipfs, dataJson, {from: address[0], gas: 4000000}, function(error, result) {
+    //     if (error) {
+    //       console.log('Error: ' + error);
+    //     } else {
+    //       console.log('Result: ' + result);
+    //     }
+    //   });
+    // } else {
+    //   masterContract.updatePatient(indexPrint.toString(), transformedArray, address[0], hash2Ipfs, dataJson, {from: address[0], gas: 4000000}, function(error, result) {
+    //     if (error) {
+    //       console.log('Error: ' + error);
+    //     } else {
+    //       console.log('Result: ' + result);
+    //     }
+    //   });
+    // }
   }
-
 
 
   // get emergency info using both fingerprints
   _retrieveEmergencyInfo(thumbPrint, indexPrint) {
     // get transformed from mapping using index fingerprint
     // web3
-    let transformed = masterContract.pullFunc(indexPrint.toString(), {from: accounts[0], gas: 4000000}, function(error, result) {
-      if (error) {
-        console.log('Error: ' + error);
-      } else {
-        transformed = result;
-        console.log('Result: ' + result);
-      }
-    });
-
-    // Using transformed get the IPFS hash to get data
-    let thumbHash = shajs('sha256').update(thumbPrint.toString()).digest('hex');
-    var ipfsHash = "";
-    for (var i = 0; i < thumbHash.length; i += 1) {
-
-      //ipfsHash += String.fromCharCode(transformed.charCodeAt(i) - thumbHash.charCodeAt(i));
-    }
-    return ipfsHash;
+    // let transformed = masterContract.pullFunc(indexPrint.toString(), {from: address[0], gas: 4000000}, function(error, result) {
+    //   if (error) {
+    //     console.log('Error: ' + error);
+    //   } else {
+    //     transformed = result;
+    //     console.log('Result: ' + result);
+    //   }
+    // });
+    //
+    // // Using transformed get the IPFS hash to get data
+    // let thumbHash = shajs('sha256').update(thumbPrint.toString()).digest('hex');
+    // var ipfsHash = "";
+    // for (var i = 0; i < thumbHash.length; i += 1) {
+    //   ipfsHash += String.fromCharCode(transformed.charCodeAt(i) - thumbHash.charCodeAt(i));
+    // }
+    // return ipfsHash;
   }
 
 
@@ -140,10 +154,17 @@ class App extends Component {
               </Row>
               <Row>
                 <Col md={6} mdOffset={3} sm={8} smOffset={2}>
-                  <p id="hash">{this.state.hash}</p>
+                  <p id="name"></p>
+                  <p id="dob"></p>
+                  <p id="hospital"></p>
+                  <p id="surgeries"></p>
                   <p id="diseases"></p>
                   <p id="medications"></p>
                   <p id="allergies"></p>
+                  <p id="medications"></p>
+                  <p id="alcohol"></p>
+                  <p id="tobacco"></p>
+                  <p id="drugs"></p>
                 </Col>
               </Row>
             </Grid>
